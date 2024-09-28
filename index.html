@@ -138,7 +138,7 @@
             const author = "--  "+document.getElementById('authorInput').value || "作者";
 
             // 设置标题文本样式
-            ctx.font = '40px "Microsoft YaHei", Tahoma, sans-serif'; // 标题字体为微软雅黑或Tahoma
+            ctx.font = '40px "YouYuan", Tahoma, sans-serif'; // 标题字体为微软雅黑或Tahoma
             ctx.fillStyle = 'black'; // 设置标题颜色
             const titleMaxWidth = canvas.width * 0.8; // 标题最大宽度为画布的80%
             const startY = 100; // 标题起始 Y 坐标，距离顶部50px
@@ -148,7 +148,7 @@
             const contentStartY = startY + titleHeight + 10; // 内容起始 Y 坐标，增加20px的间距
 
             // 设置内容文本样式
-            ctx.font = '20px "Microsoft YaHei", Tahoma, sans-serif'; // 内容字体为微软雅黑或Tahoma
+            ctx.font = '20px "YouYuan", Tahoma, sans-serif'; // 内容字体为微软雅黑或Tahoma
             ctx.fillStyle = 'black'; // 设置内容颜色
             const contentMaxWidth = canvas.width * 0.8; // 内容最大宽度为画布的80%
             const contentHeight = wrapText(ctx, content, (canvas.width - contentMaxWidth) / 2, contentMaxWidth, contentStartY, 20); // 行高为10px
