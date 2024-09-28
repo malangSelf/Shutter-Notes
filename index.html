@@ -121,7 +121,7 @@
 
             // 绘制背景图片并添加模糊效果
             if (backgroundImage) {
-                ctx.filter = 'blur(3px)'; // 设置模糊效果
+                ctx.filter = 'blur(2px)'; // 设置模糊效果
                 ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
                 ctx.filter = 'none'; // 重置过滤器以便后续绘制正常显示
             }
@@ -135,32 +135,33 @@
             // 获取用户输入，添加默认值
             const title = document.getElementById('titleInput').value || "标题";
             const content = document.getElementById('contentInput').value || "内容";
-            const author = document.getElementById('authorInput').value || "作者";
+            const author = "--  "+document.getElementById('authorInput').value || "作者";
 
             // 设置标题文本样式
-            ctx.font = '40px Arial';
+            ctx.font = '40px "Microsoft YaHei", Tahoma, sans-serif'; // 标题字体为微软雅黑或Tahoma
             ctx.fillStyle = 'black'; // 设置标题颜色
             const titleMaxWidth = canvas.width * 0.8; // 标题最大宽度为画布的80%
             const startY = 100; // 标题起始 Y 坐标，距离顶部50px
             const titleHeight = wrapText(ctx, title, (canvas.width - titleMaxWidth) / 2, titleMaxWidth, startY, 40); // 行高为40px
 
             // 在标题和内容之间增加间距
-            const contentStartY = startY + titleHeight + 20; // 内容起始 Y 坐标，增加20px的间距
+            const contentStartY = startY + titleHeight + 10; // 内容起始 Y 坐标，增加20px的间距
 
             // 设置内容文本样式
-            ctx.font = '20px Arial'; // 可以根据需要设置内容的字体大小
+            ctx.font = '20px "Microsoft YaHei", Tahoma, sans-serif'; // 内容字体为微软雅黑或Tahoma
             ctx.fillStyle = 'black'; // 设置内容颜色
             const contentMaxWidth = canvas.width * 0.8; // 内容最大宽度为画布的80%
             const contentHeight = wrapText(ctx, content, (canvas.width - contentMaxWidth) / 2, contentMaxWidth, contentStartY, 20); // 行高为10px
 
 
             // 计算作者信息的位置，距离右边和下边各10%的距离
-            const authorMargin = canvas.height * 0.1; // 10%的边距
-            const authorX = canvas.width - ctx.measureText(author).width - authorMargin; // 作者文本的 X 坐标，右对齐
-            const authorY = canvas.height - authorMargin; // 作者文本的 Y 坐标
+            const authorRight = canvas.height * 0.2; // 10%的边距
+            const authorLeft = canvas.height * 0.1; // 10%的边距
+            const authorX = canvas.width - ctx.measureText(author).width - authorRight; // 作者文本的 X 坐标，右对齐
+            const authorY = canvas.height - authorLeft; // 作者文本的 Y 坐标
 
             // 设置作者文本样式
-            ctx.font = '18px Arial';
+            ctx.font = '30px Tahoma, sans-serif'; // 标题字体为微软雅黑或Tahoma
             ctx.fillStyle = 'black'; // 设置作者颜色
             ctx.fillText(author, authorX, authorY);
 
