@@ -1,121 +1,172 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas 文本排版示例</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         canvas {
             border: 1px solid #ccc;
+            margin-top: 20px;
         }
+
+        .container {
+            margin-top: 20px;
+        }
+
         body {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            flex-direction: column;
+            height: 100vh;
+            /* 让页面占满视口 */
+            background-color: #f8f9fa;
+            /* 背景颜色 */
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            /* 输入框与按钮间距 */
         }
     </style>
 </head>
+
 <body>
-    <input type="text" id="titleInput" placeholder="请输入标题">
-    <textarea id="contentInput" placeholder="请输入内容" rows="4" cols="50"></textarea>
-    <input type="text" id="authorInput" placeholder="请输入作者">
-    <button id="generateBtn">生成图片</button>
-    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <div class="container text-center">
+        <input type="file" id="bgUpload" accept="image/*" class="form-control mb-3" placeholder="上传背景图片">
+        <input type="text" id="titleInput" class="form-control mb-3" placeholder="请输入标题">
+        <textarea id="contentInput" class="form-control mb-3" placeholder="请输入内容" rows="4"></textarea>
+        <input type="text" id="authorInput" class="form-control mb-3" placeholder="请输入作者">
+        <button id="generateBtn" class="btn btn-primary">生成图片</button>
+        <canvas id="myCanvas" width="600" height="400"></canvas>
+    </div>
 
     <script>
+        let backgroundImage = null;
+
+        // 上传背景图片
+        document.getElementById('bgUpload').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    backgroundImage = new Image();
+                    backgroundImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         function calculateTextHeight(ctx, text, maxWidth) {
             const lineHeight = 30; // 行高
             let height = 0;
             let lines = [];
-            const words = text.split(' '); // 按空格分割文本为单词
+            const words = text.split(' ');
 
             let line = '';
             for (let n = 0; n < words.length; n++) {
-                const testLine = line ? line + ' ' + words[n] : words[n]; // 加入空格
+                const testLine = line ? line + ' ' + words[n] : words[n];
                 const metrics = ctx.measureText(testLine);
                 const testWidth = metrics.width;
 
                 if (testWidth > maxWidth && n > 0) {
-                    lines.push(line); // 保存当前行
-                    line = words[n]; // 开始新的一行
-                    height += 30; // 增加高度
+                    lines.push(line);
+                    line = words[n];
+                    height += 30;
                 } else {
-                    line = testLine; // 添加到当前行
+                    line = testLine;
                 }
             }
-            lines.push(line); // 添加最后一行
-            return height + 30; // 返回总高度，包括最后一行
+            lines.push(line);
+            return height + 30;
         }
 
-        function wrapText(ctx, text, x, maxWidth, y) {
-            const words = text.split(' '); // 按空格分割文本为单词
+        function wrapText(ctx, text, x, maxWidth, y, lineHeight) {
+            const words = text.split(' ');
             let line = '';
             const lines = [];
 
             for (let n = 0; n < words.length; n++) {
-                const testLine = line ? line + ' ' + words[n] : words[n]; // 加入空格
+                const testLine = line ? line + ' ' + words[n] : words[n];
                 const metrics = ctx.measureText(testLine);
                 const testWidth = metrics.width;
 
                 if (testWidth > maxWidth && n > 0) {
-                    lines.push(line); // 保存当前行
-                    line = words[n]; // 开始新的一行
+                    lines.push(line);
+                    line = words[n];
                 } else {
-                    line = testLine; // 添加到当前行
+                    line = testLine;
                 }
             }
-            lines.push(line); // 添加最后一行
+            lines.push(line);
 
-            // 绘制所有行内容
             for (let i = 0; i < lines.length; i++) {
-                ctx.fillText(lines[i], x, y + (i * 30)); // 每行之间增加行高
+                ctx.fillText(lines[i], x, y + (i * lineHeight)); // 使用行高来调整Y坐标
             }
-            return lines.length * 30; // 返回绘制的总行数高度
+            return lines.length * lineHeight; // 返回总高度
         }
 
-        document.getElementById('generateBtn').addEventListener('click', function() {
+
+
+        document.getElementById('generateBtn').addEventListener('click', function () {
             const canvas = document.getElementById('myCanvas');
             const ctx = canvas.getContext('2d');
 
             // 清空画布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 获取用户输入
+            // 绘制背景图片并添加模糊效果
+            if (backgroundImage) {
+                ctx.filter = 'blur(3px)'; // 设置模糊效果
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none'; // 重置过滤器以便后续绘制正常显示
+            }
+            // 如果背景图片存在，则绘制并模糊处理
+            if (backgroundImage) {
+                ctx.filter = 'blur(5px)'; // 设置模糊效果
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none'; // 重置过滤器以便后续绘制正常显示
+            }
+
+            // 获取用户输入，添加默认值
             const title = document.getElementById('titleInput').value || "标题";
-            const content = document.getElementById('contentInput').value || "内容部分，详细信息将在此展示。";
-            const author = document.getElementById('authorInput').value || "作者姓名";
+            const content = document.getElementById('contentInput').value || "内容";
+            const author = document.getElementById('authorInput').value || "作者";
 
-            // 设置字体样式
-            ctx.fillStyle = 'black'; // 字体颜色
-
-            // 计算最大宽度
-            const titleMaxWidth = canvas.width * 0.8; // 标题最大宽度为画布宽度的 80%
-            const contentMaxWidth = canvas.width * 0.8; // 内容最大宽度为画布宽度的 80%
-
-            // 计算初始 Y 坐标，加入一定的顶部边距
-            const topMargin = 40; // 顶部边距
-            const startY = topMargin + (canvas.height / 2) - (calculateTextHeight(ctx, content, contentMaxWidth) + 40); 
-
-            // 绘制标题，字体大小改为30px
-            ctx.font = '30px Arial'; // 设置标题字体
-            const titleHeight = wrapText(ctx, title, (canvas.width - titleMaxWidth) / 2, titleMaxWidth, startY);
+            // 设置标题文本样式
+            ctx.font = '40px Arial';
+            ctx.fillStyle = 'black'; // 设置标题颜色
+            const titleMaxWidth = canvas.width * 0.8; // 标题最大宽度为画布的80%
+            const startY = 100; // 标题起始 Y 坐标，距离顶部50px
+            const titleHeight = wrapText(ctx, title, (canvas.width - titleMaxWidth) / 2, titleMaxWidth, startY, 40); // 行高为40px
 
             // 在标题和内容之间增加间距
             const contentStartY = startY + titleHeight + 20; // 内容起始 Y 坐标，增加20px的间距
 
-            // 绘制内容，使其与标题左对齐
-            ctx.font = '20px Arial'; // 设置内容字体
-            const contentHeight = wrapText(ctx, content, (canvas.width - contentMaxWidth) / 2, contentMaxWidth, contentStartY);
-            
+            // 设置内容文本样式
+            ctx.font = '20px Arial'; // 可以根据需要设置内容的字体大小
+            ctx.fillStyle = 'black'; // 设置内容颜色
+            const contentMaxWidth = canvas.width * 0.8; // 内容最大宽度为画布的80%
+            const contentHeight = wrapText(ctx, content, (canvas.width - contentMaxWidth) / 2, contentMaxWidth, contentStartY, 20); // 行高为10px
+
+
             // 计算作者信息的位置，距离右边和下边各10%的距离
             const authorMargin = canvas.height * 0.1; // 10%的边距
             const authorX = canvas.width - ctx.measureText(author).width - authorMargin; // 作者文本的 X 坐标，右对齐
             const authorY = canvas.height - authorMargin; // 作者文本的 Y 坐标
-            
-            ctx.font = '18px Arial'; // 设置作者字体
-            ctx.fillText(author, authorX, authorY); // 绘制作者文本
+
+            // 设置作者文本样式
+            ctx.font = '18px Arial';
+            ctx.fillStyle = 'black'; // 设置作者颜色
+            ctx.fillText(author, authorX, authorY);
+
         });
+
     </script>
 </body>
+
 </html>
