@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas 文本排版示例</title>
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="titleInput" placeholder="请输入标题">
+    <textarea id="contentInput" placeholder="请输入内容" rows="4" cols="50"></textarea>
+    <input type="text" id="authorInput" placeholder="请输入作者">
+    <button id="generateBtn">生成图片</button>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <script>
+        function calculateTextHeight(ctx, text, maxWidth) {
+            const lineHeight = 30; // 行高
+            let height = 0;
+            let lines = [];
+            const words = text.split(' '); // 按空格分割文本为单词
+
+            let line = '';
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line ? line + ' ' + words[n] : words[n]; // 加入空格
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+
+                if (testWidth > maxWidth && n > 0) {
+                    lines.push(line); // 保存当前行
+                    line = words[n]; // 开始新的一行
+                    height += 30; // 增加高度
+                } else {
+                    line = testLine; // 添加到当前行
+                }
+            }
+            lines.push(line); // 添加最后一行
+            return height + 30; // 返回总高度，包括最后一行
+        }
+
+        function wrapText(ctx, text, x, maxWidth, y) {
+            const words = text.split(' '); // 按空格分割文本为单词
+            let line = '';
+            const lines = [];
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line ? line + ' ' + words[n] : words[n]; // 加入空格
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+
+                if (testWidth > maxWidth && n > 0) {
+                    lines.push(line); // 保存当前行
+                    line = words[n]; // 开始新的一行
+                } else {
+                    line = testLine; // 添加到当前行
+                }
+            }
+            lines.push(line); // 添加最后一行
+
+            // 绘制所有行内容
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i], x, y + (i * 30)); // 每行之间增加行高
+            }
+            return lines.length * 30; // 返回绘制的总行数高度
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('myCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 获取用户输入
+            const title = document.getElementById('titleInput').value || "标题";
+            const content = document.getElementById('contentInput').value || "内容部分，详细信息将在此展示。";
+            const author = document.getElementById('authorInput').value || "作者姓名";
+
+            // 设置字体样式
+            ctx.fillStyle = 'black'; // 字体颜色
+
+            // 计算最大宽度
+            const titleMaxWidth = canvas.width * 0.8; // 标题最大宽度为画布宽度的 80%
+            const contentMaxWidth = canvas.width * 0.8; // 内容最大宽度为画布宽度的 80%
+
+            // 计算初始 Y 坐标，加入一定的顶部边距
+            const topMargin = 40; // 顶部边距
+            const startY = topMargin + (canvas.height / 2) - (calculateTextHeight(ctx, content, contentMaxWidth) + 40); 
+
+            // 绘制标题，字体大小改为30px
+            ctx.font = '30px Arial'; // 设置标题字体
+            const titleHeight = wrapText(ctx, title, (canvas.width - titleMaxWidth) / 2, titleMaxWidth, startY);
+
+            // 在标题和内容之间增加间距
+            const contentStartY = startY + titleHeight + 20; // 内容起始 Y 坐标，增加20px的间距
+
+            // 绘制内容，使其与标题左对齐
+            ctx.font = '20px Arial'; // 设置内容字体
+            const contentHeight = wrapText(ctx, content, (canvas.width - contentMaxWidth) / 2, contentMaxWidth, contentStartY);
+            
+            // 计算作者信息的位置，距离右边和下边各10%的距离
+            const authorMargin = canvas.height * 0.1; // 10%的边距
+            const authorX = canvas.width - ctx.measureText(author).width - authorMargin; // 作者文本的 X 坐标，右对齐
+            const authorY = canvas.height - authorMargin; // 作者文本的 Y 坐标
+            
+            ctx.font = '18px Arial'; // 设置作者字体
+            ctx.fillText(author, authorX, authorY); // 绘制作者文本
+        });
+    </script>
+</body>
+</html>
