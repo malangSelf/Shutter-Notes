@@ -1,3 +1,2 @@
-# Shutter-Notes
-Generate display images from text quickly and easily
 ![alt text](source/README/images.png)
+![alt text](source/README/images-1.png)
